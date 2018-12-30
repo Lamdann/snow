@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Snow</title>
+    <!--<script src="jquery-3.2.0.js"></script>-->
+    <script src = "snowflake.js"></script>
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+        }
+        body{
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            /*-webkit-animation:zoom 5s infinite;*/
+            /*animation:zoom 5s infinite;*/
+        }
+        canvas{
+            position: absolute;
+            top:0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #9AC0E5;
+
+        }
+    </style>
+</head>
+<body>
+<canvas id = "canvas"></canvas>
+<script>
+    //#bce8f1;#9AC0E5;
+    var canvas = document.getElementById("canvas");
+    canvas.width  = screen.width;
+    canvas.height = screen.height;
+    var ctx = canvas.getContext("2d");
+
+    var canvas1 = document.createElement("CANVAS");
+    canvas1.width  = screen.width;
+    canvas1.height = screen.height;
+    document.body.appendChild(canvas1);
+    var ctx1 = canvas1.getContext("2d");
+
+    let images=[];
+    images.push("snowflakes1.png");
+    images.push("snowflakes3.png");
+    images.push("snowflakes5.png");
+
+
+//LightCyan LightBlue LightBlue
+   let  height = screen.height;
+   let  width = screen.width;
+    document.body.onresize = function (event) {
+        hight = event.target.height;
+        wigth = event.target.width;
+    };
+    let stopRun = false;
+    document.body.addEventListener("click",function () {
+        stopRun = !stopRun;
+        setTimeout(showBack,25);
+    });
+
+    var snow = 	initRandomSnowFlake(100,5,"White"     ,screen.width,screen.height,{x:0, y:5},ctx,true,10,images);
+    var snow1 = initRandomSnowFlake(100,7,"LightCyan" ,screen.width,screen.height,{x:0, y:5},ctx,true,100,images);
+    var snow2 = initRandomSnowFlake(100,10,"White"     ,screen.width,screen.height,{x:0, y:5},ctx,true,300,images);
+
+    snow =snow.concat(snow1);
+    snow =snow.concat(snow2);
+//let wind = [-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,0,5.5,3.5,2.5,1.5,0,0.5,-1.5,-2.5-3.5-4.5-5.5];
+
+
+    setTimeout(function () {
+        getRandomWind(snow,2,3,60000);
+    },60000);
+
+    function getRandomWind(snow,min,max,timOut) {
+        let w =Math.random()>0.45?1:0;
+        if(w>0)
+        for(let i=0;i<snow.length;i++){
+            snow[i].wind = getRandomFloat(min,max);
+        }
+        else{
+            for(let i=0;i<snow.length;i++){
+                snow[i].wind =w;
+            }
+        }
+        setTimeout(function (){
+            getRandomWind (snow,-max,-min,timOut);
+        },timOut);
+    }
+let times = 0;
+    let speed =calcSpeed(ctx1);
+    console.log("speed = ",speed);
+    function showBack() {
+        ctx1.clearRect(0,0,width,height);
+        snow.forEach((x)=>{x.calc(x); });
+        snow.forEach((x)=>{x.draw(x,ctx1); });
+        canvas1.style.zIndex = 1;
+        canvas.style.zIndex = 0;
+        if(!stopRun)
+        setTimeout(showFront,25);
+    }
+    function showFront( ) {
+
+        ctx.clearRect(0,0,width,height);
+        snow.forEach((x)=>{
+            if(x.image!=undefined){
+                times++;
+                if(times%30==0){
+                    x.inflate = true;
+                    times=0;
+                }
+            }
+            x.calc(x); });
+        snow.forEach((x)=>{x.draw(x,ctx); });
+        canvas1.style.zIndex = 0;
+        canvas.style.zIndex = 1;
+        if(!stopRun)
+        setTimeout(showBack,25);
+    }
+    function calcSpeed(ctx,width,height){
+        let t1 = new Date();
+        for(let i = 0; i <1000;i++) {
+            ctx.clearRect(0, 0, width, height);
+        }
+        let t2 = new Date();
+        return t2-t1;
+    }
+
+    showFront();
+</script>
+</body>
+</html>
